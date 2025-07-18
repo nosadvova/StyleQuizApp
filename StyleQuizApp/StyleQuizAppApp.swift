@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
-import Firebase
+import FirebaseCore
+import FirebaseFirestore
+import ComposableArchitecture
 
 @main
 struct StyleQuizAppApp: App {
@@ -16,11 +18,17 @@ struct StyleQuizAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WelcomeView(store: Store(initialState: WelcomeFeature.State(), reducer: {
+                WelcomeFeature()
+            }))
         }
     }
 
     private func setupServices() {
         FirebaseApp.configure()
+
+//        Task {
+//            try await FirebaseService().fetchQuizPages()
+//        }
     }
 }

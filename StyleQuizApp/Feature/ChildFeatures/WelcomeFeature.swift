@@ -17,14 +17,14 @@ struct WelcomeFeature {
     }
 
     enum Action: Equatable {
-
+        case startQuiz
     }
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            default:
-                    .none
+            case .startQuiz:
+                return .none
             }
         }
     }
