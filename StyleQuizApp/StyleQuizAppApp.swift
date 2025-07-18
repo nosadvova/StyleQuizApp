@@ -6,12 +6,21 @@
 //
 
 import SwiftUI
+import Firebase
 
 @main
 struct StyleQuizAppApp: App {
+    init() {
+        setupServices()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
+    }
+
+    private func setupServices() {
+        FirebaseApp.configure()
     }
 }
