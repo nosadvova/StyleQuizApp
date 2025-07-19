@@ -106,13 +106,19 @@ struct QuizPage: Codable, Identifiable {
     )
 }
 
+extension QuizPage: Equatable {
+    static func == (lhs: QuizPage, rhs: QuizPage) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
 enum QuizType: String, Codable {
     case text
     case image
     case color
 }
 
-struct QuizOptions: Codable, Identifiable {
+struct QuizOptions: Codable, Identifiable, Equatable {
     var id = UUID().uuidString
     let title: String
     let description: String?

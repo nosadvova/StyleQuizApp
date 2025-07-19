@@ -12,15 +12,7 @@ enum LocKey: String {
     case continueLabel
     case takeQuiz
     case welcomeScreenTitle
-
-//    // Focus quiz
-//    case focusQuizTitle
-//    case focusQuizDescription
-//
-//    // Style quiz
-//    case styleQuizTitle
-//
-//    // Color quiz
-//    case colorQuizTitle
+    case lifestyleAndInterests
+    case stylePreferences
 
 }

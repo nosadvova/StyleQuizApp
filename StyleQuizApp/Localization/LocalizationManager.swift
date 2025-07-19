@@ -7,12 +7,12 @@
 
 import Foundation
 
-class LocalizationManager {
+enum LocalizationManager {
     static func localizedString(key: LocKey) -> String {
         return NSLocalizedString(key.rawValue, comment: "")
     }
+}
 
-    func localized(_ key: LocKey) -> String {
-        return LocalizationManager.localizedString(key: key)
-    }
+func localized(_ key: LocKey) -> String {
+    return LocalizationManager.localizedString(key: key)
 }

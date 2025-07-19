@@ -17,7 +17,11 @@ struct UserFavouriteColorFeature {
     }
 
     enum Action: Equatable {
-
+        case delegate(Delegate)
+        
+        enum Delegate: Equatable {
+            case pop
+        }
     }
 
     var body: some ReducerOf<Self> {
