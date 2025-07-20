@@ -122,7 +122,6 @@ struct QuizOptions: Codable, Identifiable, Equatable {
     var id = UUID().uuidString
     let title: String
     let description: String?
-//    var imageData: String?
     var imageData: Data?
     var colorName: String?
 }

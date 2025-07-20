@@ -12,26 +12,26 @@ struct UserFocusView: View {
     let store: StoreOf<UserFocusFeature>
 
     var body: some View {
-        WithPerceptionTracking {
-            NavigationView {
-                QuizPageView(quizPage: store.page) {
-                    List {
-                        ForEach(store.page.variants) { variant in
-                            QuizOptionCell(quizOption: variant, store: store)
-                                .listRowSeparator(.hidden)
+        NavigationView {
+            WithPerceptionTracking {
+                QuizPageView(quizPage: store.quizPage) {
+                    ScrollView(.vertical) {
+                        VStack {
+                            ForEach(store.quizPage.variants) { variant in
+                                QuizOptionCell(quizOption: variant, store: store)
+                            }
                         }
                     }
-                    .listStyle(.plain)
                 } onContinue: {
-//                    store.send(.)
+                    store.send(.delegate(.pushNext(store.nextPageIndex)))
                 }
                 .padding(EdgeInsets(top: 16, leading: 20, bottom: 22, trailing: 20))
             }
-            .navigationBarBackButtonHidden()
-            .modifier(ToolbarContentModifier(title: localized(.lifestyleAndInterests)) {
-                store.send(.delegate(.pop))
-            })
         }
+        .navigationBarBackButtonHidden()
+        .modifier(ToolbarContentModifier(title: localized(.lifestyleAndInterests)) {
+            store.send(.pop)
+        })
     }
 }
 
@@ -62,8 +62,8 @@ private struct QuizOptionCell: View {
                     Image(optionSelected ? .checkedBox : .uncheckedBox)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
             }
+            .padding(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
             .buttonStyle(.plain)
             .background {
                 Rectangle()
@@ -71,5 +71,11 @@ private struct QuizOptionCell: View {
             }
         }
     }
+}
+
+#Preview {
+    UserFocusView(store: Store(initialState: UserFocusFeature.State(quizPage: .textQuiz), reducer: {
+        UserFocusFeature()
+    }))
 }
 

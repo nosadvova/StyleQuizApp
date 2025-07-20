@@ -14,5 +14,6 @@ enum LocKey: String {
     case welcomeScreenTitle
     case lifestyleAndInterests
     case stylePreferences
+    case showQuizHistory
 
 }

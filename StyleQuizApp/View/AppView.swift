@@ -9,43 +9,31 @@ import SwiftUI
 import ComposableArchitecture
 
 struct AppView: View {
-    let store: StoreOf<AppFeature>
+    @Perception.Bindable var store: StoreOf<AppFeature>
 
     var body: some View {
         WithPerceptionTracking {
-            ZStack {
-                Image("welcome_screen_background")
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        .black,
-                        .black.opacity(0.9),
-                        .clear
-                    ]),
-                    startPoint: .bottom,
-                    endPoint: .center
-                )
-                .ignoresSafeArea()
-
-                VStack(alignment: .leading, spacing: 61) {
-                    Spacer()
-
-                    Text(localized(.welcomeScreenTitle))
-                        .foregroundStyle(.white)
-                        .font(.customFont(.kaisenMedium, size: 32))
-                        .multilineTextAlignment(.leading)
-
-                    Button(localized(.takeQuiz).uppercased()) {
-                        store.send(.startQuizTapped(.text))
+            NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
+                WelcomeView(store: store.scope(state: \.welcomeScreen, action: \.welcomeScreen))
+            } destination: { store in
+                switch store.state {
+                case .savedAnswersScreen(_):
+                    if let store = store.scope(state: \.savedAnswersScreen, action: \.savedAnswersScreen) {
+                        SavedAnswersView(store: store)
                     }
-                    .buttonStyle(SquareButtonStyle(tint: .white, foregroundStyle: .black))
-
+                case .userFocusScreen(_):
+                    if let store = store.scope(state: \.userFocusScreen, action: \.userFocusScreen) {
+                        UserFocusView(store: store)
+                    }
+                case .userStyleScreen(_):
+                    if let store = store.scope(state: \.userStyleScreen, action: \.userStyleScreen) {
+                        UserStyleView(store: store)
+                    }
+                case .userFavouriteColorScreen(_):
+                    if let store = store.scope(state: \.userFavouriteColorScreen, action: \.userFavouriteColorScreen) {
+                        UserFavouriteColorView(store: store)
+                    }
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 58)
             }
         }
     }

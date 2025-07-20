@@ -19,15 +19,34 @@ struct UserStyleView: View {
     var body: some View {
         WithPerceptionTracking {
             NavigationView {
-                QuizPageView(quizPage: store.quizPage) {
-                    LazyVGrid(columns: columns) {
-                        ForEach(store.quizPage.variants) { option in
-                            QuizOptionCell(quizOption: option, store: store)
+                WithPerceptionTracking {
+                    GeometryReader { geometry in
+                        QuizPageView(quizPage: store.quizPage) {
+                            ScrollView(.vertical) {
+                                WithPerceptionTracking {
+                                    LazyVGrid(columns: columns) {
+                                        ForEach(store.quizPage.variants) { option in
+                                            QuizOptionCell(quizOption: option, store: store, geometry: geometry)
+                                        }
+                                    }
+                                    .padding(.bottom, 20)
+                                }
+                            }
+                        } onContinue: {
+                            store.send(.delegate(.pushNext(store.nextPageIndex)))
                         }
+                        .padding(EdgeInsets(top: 16, leading: 20, bottom: 22, trailing: 20))
+                        .frame(maxWidth: .infinity, alignment: .top)
                     }
-                } onContinue: {
-                    //
                 }
+            }
+            .modifier(ToolbarContentModifier(title: localized(.stylePreferences).uppercased(), onBack: {
+                store.send(.pop)
+            }))
+            .scrollIndicators(.hidden)
+            .navigationBarBackButtonHidden()
+            .onAppear {
+                store.send(.onAppearLoad)
             }
         }
     }
@@ -36,6 +55,7 @@ struct UserStyleView: View {
 private struct QuizOptionCell: View {
     let quizOption: QuizOptions
     let store: StoreOf<UserStyleFeature>
+    let geometry: GeometryProxy
 
     var optionSelected: Bool {
         return store.selectedOptionIDs.contains(quizOption.id)
@@ -44,16 +64,21 @@ private struct QuizOptionCell: View {
     var body: some View {
         WithPerceptionTracking {
             Button {
-                //
+                store.send(.selectOption(quizOption.id))
             } label: {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .center, spacing: 4) {
                     if let data = store.state.quizOptionImages[quizOption.id], let image = UIImage(data: data) {
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFit()
+                            .frame(width: geometry.size.width / 2.5, height: 120)
+                            .clipped()
+                    } else {
+                        ProgressView()
+                            .frame(width: geometry.size.width / 2.5, height: 120)
                     }
 
-                    Text(quizOption.title)
+                    Text(quizOption.title.uppercased())
                         .font(.customFont(optionSelected ? .poppinsMedium : .poppinsLight, size: 13))
                 }
                 .overlay(alignment: .topTrailing) {
@@ -61,13 +86,11 @@ private struct QuizOptionCell: View {
                 }
                 .padding(8)
             }
-//            .frame(maxWidth: .infinity)
-//            .padding(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
-        }
-        .buttonStyle(.plain)
-        .background {
-            Rectangle()
-                .stroke(optionSelected ? .strokePrimary : .strokeSecondary, lineWidth: 0.5)
+            .buttonStyle(.plain)
+            .background {
+                Rectangle()
+                    .stroke(optionSelected ? .strokePrimary : .strokeSecondary, lineWidth: 0.5)
+            }
         }
     }
 }

@@ -14,87 +14,75 @@ struct AppFeature {
     @ObservableState
     struct State: Equatable {
         var path = StackState<Path.State>()
+        var welcomeScreen = WelcomeFeature.State()
         var quizPages: [QuizPage] = []
-        var pagesLoading = false
     }
 
-    enum Action: Equatable {
-        case path(StackActionOf<Path>)
-        case quizResponse(QuizPage)
-        case startQuizTapped(QuizType)
-        case pop
+    enum Action {
+        case path(StackAction<Path.State, Path.Action>)
+        case welcomeScreen(WelcomeFeature.Action)
+//        case storeQuizPages([QuizPage])
+
         case popToRoot
     }
 
     @Dependency(\.firebaseService) var firebaseService
 
     var body: some ReducerOf<Self> {
+        Scope(state: \.welcomeScreen, action: \.welcomeScreen) {
+            WelcomeFeature()
+        }
+
         Reduce { state, action in
             switch action {
-            case .startQuizTapped(let type):
-                state.pagesLoading = true
-                return .run { send in
-                    let quizPages = try await firebaseService.fetchQuizPages()
-                    guard let focusPage = quizPages.first(where: { $0.type == type })
-                    else { return }
-
-                    await send(.quizResponse(focusPage))
-                }
-
-            case .pop:
-                _ = state.path.popLast()
-                return .none
 
             case .popToRoot:
                 state.path.removeAll()
                 return .none
 
-            case .quizResponse(let quizPage):
-                state.pagesLoading = false
-                state.path.append(.userFocusScreen(UserFocusFeature.State(page: quizPage, selectedOptionIDs: [])))
+            case .welcomeScreen(.delegate(.pushNext(let quizPage))):
+                state.path.append(.userFocusScreen(UserFocusFeature.State(quizPage: quizPage)))
                 return .none
 
-            case .path(.element(id: _, action: .userFocusScreen(.delegate(.pop)))):
-                return .send(.pop)
-
-            case .path(.element(id: _, action: .userFocusScreen(.delegate(.pushNext)))):
+            case .welcomeScreen(.delegate(.storeQuizPages(let pages))):
+                state.quizPages = pages
                 return .none
+
+            case .welcomeScreen(.showQuizHistoryTapped):
+                state.path.append(.savedAnswersScreen(SavedAnswersFeature.State(quizPages: state.quizPages)))
+                return .none
+
+            case .path(.element(id: _, action: .userFocusScreen(.delegate(.pushNext(let index))))):
+                guard let quizPage = state.quizPages.first(where: { $0.order == index }) else {
+                    return .none
+                }
+
+                state.path.append(.userStyleScreen(UserStyleFeature.State(quizPage: quizPage)))
+                return .none
+
+            case .path(.element(id: _, action: .userStyleScreen(.delegate(.pushNext(let index))))):
+                guard let quizPage = state.quizPages.first(where: { $0.order == index }) else {
+                    return .none
+                }
+
+                state.path.append(.userFavouriteColorScreen(UserFavouriteColorFeature.State(quizPage: quizPage)))
+                return .none
+
+            case .path(.element(id: _, action: .userFavouriteColorScreen(.delegate(.popToRoot)))):
+                return .send(.popToRoot)
 
             default:
                 return .none
             }
         }
-        .forEach(\.path, action: \.path) {
-            Path()
-        }
+        .forEach(\.path, action: \.path)
     }
 
-    @Reducer
-    struct Path {
-
-        @ObservableState
-        enum State: Equatable {
-            case userFocusScreen(UserFocusFeature.State)
-            case userStyleScreen(UserStyleFeature.State)
-            case userFavouriteColorScreen(UserFavouriteColorFeature.State)
-        }
-
-        enum Action: Equatable {
-            case userFocusScreen(UserFocusFeature.Action)
-            case userStyleScreen(UserStyleFeature.Action)
-            case userFavouriteColorScreen(UserFavouriteColorFeature.Action)
-        }
-
-        var body: some ReducerOf<Self> {
-            Scope(state: \.userFocusScreen, action: \.userFocusScreen) {
-                UserFocusFeature()
-            }
-            Scope(state: \.userStyleScreen, action: \.userStyleScreen) {
-                UserStyleFeature()
-            }
-            Scope(state: \.userFavouriteColorScreen, action: \.userFavouriteColorScreen) {
-                UserFavouriteColorFeature()
-            }
-        }
+    @Reducer(state: .equatable)
+    enum Path {
+        case savedAnswersScreen(SavedAnswersFeature)
+        case userFocusScreen(UserFocusFeature)
+        case userStyleScreen(UserStyleFeature)
+        case userFavouriteColorScreen(UserFavouriteColorFeature)
     }
 }

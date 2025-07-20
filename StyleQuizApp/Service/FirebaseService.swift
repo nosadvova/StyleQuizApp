@@ -14,6 +14,7 @@ import FirebaseFirestore
 struct FirebaseService {
     var fetchQuizPages: () async throws -> [QuizPage]
     var fetchQuizImage: (_ optionID: String) async throws -> Data
+    var fetchOptionByIDs: (_ pages: [QuizPage], _ optionIDs: [String]) async throws -> [QuizOptions]
 }
 
 enum FirebaseServiceKey: DependencyKey {
@@ -39,7 +40,6 @@ extension FirebaseService {
                 try $0.data(as: QuizPage.self)
             }
         },
-
         fetchQuizImage: { optionID in
             try await withCheckedThrowingContinuation { continuation in
                 let storage = Storage.storage()
@@ -56,6 +56,30 @@ extension FirebaseService {
                     }
                 }
             }
+        },
+        fetchOptionByIDs: { quizPages, optionIDs in
+            let db = Firestore.firestore()
+            var options: [QuizOptions] = []
+
+            try await withThrowingTaskGroup(of: QuizOptions.self) { group in
+                for id in optionIDs {
+                    group.addTask {
+                        let doc = try await db.collection("quiz_pages").document(id).getDocument()
+                        guard let data = doc.data() else {
+                            throw NSError(domain: "Missing document", code: 404)
+                        }
+                        var decoded = try Firestore.Decoder().decode(QuizOptions.self, from: data)
+                        decoded.id = doc.documentID
+                        return decoded
+                    }
+                }
+
+                for try await option in group {
+                    options.append(option)
+                }
+            }
+
+            return options
         }
     )
 }
@@ -76,9 +100,9 @@ extension FirebaseService {
             ]
         },
 
-        fetchQuizImage: { _ in
-            Data()
-        }
+        fetchQuizImage: { _ in Data() },
+
+        fetchOptionByIDs: { _, _ in QuizPage.colorPage.variants }
     )
 }
 

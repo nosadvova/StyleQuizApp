@@ -12,7 +12,7 @@ struct QuizPageView<Content>: View where Content: View {
     let quizPage: QuizPage
     let content: () -> Content
     let onContinue: () -> Void
-
+    
     var body: some View {
         WithPerceptionTracking {
             VStack(alignment: .leading) {
@@ -20,10 +20,11 @@ struct QuizPageView<Content>: View where Content: View {
                     Text(quizPage.title)
                         .font(.customFont(.kaisenMedium, size: 26))
                         .multilineTextAlignment(.leading)
-
+                    
                     if let description = quizPage.description {
                         Text(description)
                             .font(.customFont(.poppinsLight, size: 14))
+                            .padding(.top, 8)
                     }
                 }
 

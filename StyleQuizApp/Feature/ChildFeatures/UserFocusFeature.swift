@@ -12,34 +12,39 @@ import ComposableArchitecture
 struct UserFocusFeature {
 
     @ObservableState
-    struct State: Equatable {
-        var page: QuizPage
-        var selectedOptionIDs: [String]
+    struct State: Equatable, QuizSelectableProtocol {
+        var quizPage: QuizPage
+        var selectedOptionIDs: Set<String> = []
+        let nextPageIndex = 1
     }
 
     enum Action: Equatable {
         case selectOption(String)
+        case pop
         case delegate(Delegate)
 
-        enum Delegate {
-            case pop
-            case pushNext
+        enum Delegate: Equatable {
+            case pushNext(Int)
         }
     }
+
+    @Dependency(\.dismiss) var dismiss
+    @Dependency(\.userDefaultsService) var userDefaults
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .selectOption(let optionID):
-                if state.selectedOptionIDs.contains(optionID) {
-                    state.selectedOptionIDs.removeAll { $0 == optionID }
-                } else {
-                    state.selectedOptionIDs.append(optionID)
-                }
+                state.selectOption(withID: optionID)
                 return .none
 
-            default:
+            case .delegate(.pushNext):
+                let ids = Array(state.selectedOptionIDs)
+                userDefaults.toggleStringInArray("savedAnswers", ids)
                 return .none
+
+            case .pop:
+                return .run { _ in await self.dismiss() }
             }
         }
     }

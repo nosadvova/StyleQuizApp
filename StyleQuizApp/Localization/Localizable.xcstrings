@@ -34,9 +34,6 @@
         }
       }
     },
-    "Hello, World!" : {
-
-    },
     "lifestyleAndInterests" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -44,6 +41,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lifestyle & Interests"
+          }
+        }
+      }
+    },
+    "showQuizHistory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quiz history"
           }
         }
       }
