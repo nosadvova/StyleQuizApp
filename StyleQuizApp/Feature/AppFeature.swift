@@ -21,7 +21,6 @@ struct AppFeature {
     enum Action {
         case path(StackAction<Path.State, Path.Action>)
         case welcomeScreen(WelcomeFeature.Action)
-//        case storeQuizPages([QuizPage])
 
         case popToRoot
     }

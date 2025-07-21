@@ -46,13 +46,6 @@ struct WelcomeFeature {
 
                     await send(.quizResponse(focusPage))
                 }
-//
-//            case .showQuizHistoryTapped():
-//                return .run { send in
-//                    let quizPages = try await firebaseService.fetchQuizPages()
-//
-//                    await send(.quizResponse(focusPage))
-//                }
 
             case .quizResponse(let quizPage):
                 state.pagesLoading = false
