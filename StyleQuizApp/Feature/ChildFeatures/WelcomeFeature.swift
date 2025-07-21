@@ -31,7 +31,6 @@ struct WelcomeFeature {
     }
 
     @Dependency(\.firebaseService) var firebaseService
-    @Dependency(\.userDefaultsService) var userDefaults
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in

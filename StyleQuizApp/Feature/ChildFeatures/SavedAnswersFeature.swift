@@ -40,7 +40,8 @@ struct SavedAnswersFeature {
                 }
 
             case .fetchQuizPages(let pages):
-                let answers = userDefaults.loadStringArray("savedAnswers") ?? []
+                let lastSessionAnswers: [String] = userDefaults.loadStringArray("lastSessionAnswers") ?? []
+                let answers = userDefaults.loadStringArray("savedAnswers") ?? lastSessionAnswers
 
                 let mergedAnswers = pages.flatMap { $0.variants }
                 let filteredOptions = mergedAnswers.filter { answers.contains($0.id) }
