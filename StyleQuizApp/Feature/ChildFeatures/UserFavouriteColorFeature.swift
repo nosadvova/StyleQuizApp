@@ -44,6 +44,9 @@ struct UserFavouriteColorFeature {
             case .delegate(.popToRoot):
                 let ids = Array(state.selectedOptionIDs)
                 userDefaults.toggleStringInArray("savedAnswers", ids)
+
+                let userDefaultValues = userDefaults.loadStringArray("savedAnswers") ?? []
+                userDefaults.toggleStringInArray("lastSessionAnswers", userDefaultValues)
                 return .none
 
             default:

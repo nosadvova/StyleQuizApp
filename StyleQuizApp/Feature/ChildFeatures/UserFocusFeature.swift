@@ -40,6 +40,7 @@ struct UserFocusFeature {
 
             case .delegate(.pushNext):
                 let ids = Array(state.selectedOptionIDs)
+                userDefaults.removeValue("savedAnswers")
                 userDefaults.toggleStringInArray("savedAnswers", ids)
                 return .none
 
