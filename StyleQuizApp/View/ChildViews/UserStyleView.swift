@@ -17,37 +17,33 @@ struct UserStyleView: View {
     ]
 
     var body: some View {
-        WithPerceptionTracking {
-            NavigationView {
+        NavigationView {
+            GeometryReader { geometry in
                 WithPerceptionTracking {
-                    GeometryReader { geometry in
-                        QuizPageView(quizPage: store.quizPage) {
-                            ScrollView(.vertical) {
-                                WithPerceptionTracking {
-                                    LazyVGrid(columns: columns) {
-                                        ForEach(store.quizPage.variants) { option in
-                                            QuizOptionCell(quizOption: option, store: store, geometry: geometry)
-                                        }
-                                    }
-                                    .padding(.bottom, 20)
+                    QuizPageView(quizPage: store.quizPage) {
+                        ScrollView(.vertical) {
+                            LazyVGrid(columns: columns) {
+                                ForEach(store.quizPage.variants) { option in
+                                    QuizOptionCell(quizOption: option, store: store, geometry: geometry)
                                 }
                             }
-                        } onContinue: {
-                            store.send(.delegate(.pushNext(store.nextPageIndex)))
+                            .padding(.bottom, 20)
                         }
-                        .padding(EdgeInsets(top: 16, leading: 20, bottom: 22, trailing: 20))
-                        .frame(maxWidth: .infinity, alignment: .top)
+                    } onContinue: {
+                        store.send(.delegate(.pushNext(store.nextPageIndex)))
                     }
+                    .padding(EdgeInsets(top: 16, leading: 20, bottom: 22, trailing: 20))
+                    .frame(maxWidth: .infinity, alignment: .top)
                 }
             }
-            .modifier(ToolbarContentModifier(title: localized(.stylePreferences).uppercased(), onBack: {
-                store.send(.pop)
-            }))
-            .scrollIndicators(.hidden)
-            .navigationBarBackButtonHidden()
-            .onAppear {
-                store.send(.onAppearLoad)
-            }
+        }
+        .modifier(ToolbarContentModifier(title: localized(.stylePreferences).uppercased(), onBack: {
+            store.send(.pop)
+        }))
+        .scrollIndicators(.hidden)
+        .navigationBarBackButtonHidden()
+        .onAppear {
+            store.send(.onAppearLoad)
         }
     }
 }

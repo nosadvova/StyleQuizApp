@@ -15,7 +15,6 @@ struct SavedAnswersFeature {
     struct State: Equatable {
         var savedAnswers: [QuizOptions] = []
         var quizPages: [QuizPage]
-        var quizOptionImages: [String: Data] = [:]
 
         // dictionary with image data with id key
     }
@@ -24,7 +23,6 @@ struct SavedAnswersFeature {
         case fetchQuizPages([QuizPage])
         case fetchAnswers
         case displayAnswers([QuizOptions])
-        case getImageData(_ optionID: String, _ imageData: Data)
         case pop
     }
 
